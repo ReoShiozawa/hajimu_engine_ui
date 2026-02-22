@@ -1,0 +1,9 @@
+{
+  "name": "engine_ui",
+  "version": "1.0.0",
+  "description": "はじむ言語用インゲームUIシステム (IMGUI方式)",
+  "author": "Reo Shiozawa",
+  "license": "MIT",
+  "entry": "engine_ui.hjp",
+  "dependencies": []
+}

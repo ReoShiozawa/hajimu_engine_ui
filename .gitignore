@@ -1,0 +1,6 @@
+build/
+*.hjp
+*.o
+*.a
+*.dylib
+*.so
