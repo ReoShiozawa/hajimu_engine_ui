@@ -131,6 +131,26 @@ static Value fn_ui_hp_color(int argc, Value* args) {
     return hajimu_string(buf);
 }
 
+/* ── 追加ウィジェット ────────────────────────────────────*/
+static Value fn_ui_progress(int argc, Value* args) {
+    NEED(6);
+    return hajimu_number((double)ui_progress(
+        (int)args[0].number, NUM(1), NUM(2), NUM(3), NUM(4), NUM(5)));
+}
+
+static Value fn_ui_radio(int argc, Value* args) {
+    NEED(7);
+    return hajimu_bool(ui_radio(
+        (int)args[0].number, (int)args[1].number,
+        NUM(2), NUM(3), NUM(4), NUM(5), BOOL_(6)));
+}
+
+static Value fn_ui_toggle(int argc, Value* args) {
+    NEED(6);
+    return hajimu_bool(ui_toggle(
+        (int)args[0].number, NUM(1), NUM(2), NUM(3), NUM(4), BOOL_(5)));
+}
+
 /* ── プラグインテーブル ─────────────────────────────────*/
 static HajimuPluginFunc funcs[] = {
     /* 初期化・更新 */
@@ -157,12 +177,16 @@ static HajimuPluginFunc funcs[] = {
     /* カラー */
     { "UIボタン色",       fn_ui_btn_color,     1, 1 },
     { "UIHPバー色",       fn_ui_hp_color,      1, 1 },
+    /* 追加ウィジェット */
+    { "UIプログレス",     fn_ui_progress,      6, 6 },
+    { "UIラジオ",         fn_ui_radio,         7, 7 },
+    { "UIトグル",         fn_ui_toggle,        6, 6 },
 };
 
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_ui",
-        .version        = "1.0.0",
+        .version        = "1.1.0",
         .functions      = funcs,
         .function_count = sizeof(funcs) / sizeof(funcs[0]),
     };

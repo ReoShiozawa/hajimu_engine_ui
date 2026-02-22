@@ -16,9 +16,10 @@
 typedef struct {
     int   id;
     bool  used;
-    /* チェックボックス */
+    /* チェックボックス / ラジオ / トグル */
     bool  checked;
-    /* スライダー */
+    int   group_id;   /* ラジオグループ識別子 */
+    /* スライダー / プログレス */
     float norm_val;
     /* スクロール */
     float scroll;
@@ -230,4 +231,44 @@ void ui_hp_color(float hp_ratio, float* r, float* g, float* b) {
         *g = hp_ratio * 2.0f;
         *b = 0.0f;
     }
+}
+
+/* ── プログレスバー ──────────────────────────────────────*/
+float ui_progress(int id, float x, float y, float w, float h, float value) {
+    (void)x; (void)y; (void)w; (void)h;
+    UIWidget* wid = widget_get(id);
+    if (value < 0.0f) value = 0.0f;
+    if (value > 1.0f) value = 1.0f;
+    if (wid) wid->norm_val = value;
+    return value;
+}
+
+/* ── ラジオボタン ────────────────────────────────────────*/
+bool ui_radio(int id, int group_id, float x, float y, float w, float h,
+              bool initial_selected) {
+    UIWidget* wid = widget_get(id);
+    if (!wid) return false;
+    wid->group_id = group_id;
+    /* 初回 initial_selected で初期化 */
+    if (!wid->checked && initial_selected) wid->checked = true;
+    if (rect_contains(x, y, w, h, g.mx, g.my) && g.just_clicked) {
+        /* 同グループの他ウィジェットを全て OFF にしてから自分を ON */
+        for (int i = 0; i < UI_MAX_WIDGETS; ++i) {
+            if (g.widgets[i].used && g.widgets[i].group_id == group_id)
+                g.widgets[i].checked = false;
+        }
+        wid->checked = true;
+    }
+    return wid->checked;
+}
+
+/* ── トグルボタン ────────────────────────────────────────*/
+bool ui_toggle(int id, float x, float y, float w, float h, bool initial_val) {
+    UIWidget* wid = widget_get(id);
+    if (!wid) return initial_val;
+    /* 初回 initial_val で初期化 */
+    if (!wid->checked && initial_val) wid->checked = true;
+    if (rect_contains(x, y, w, h, g.mx, g.my) && g.just_clicked)
+        wid->checked = !wid->checked;
+    return wid->checked;
 }

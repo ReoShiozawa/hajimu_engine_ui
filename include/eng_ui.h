@@ -113,6 +113,29 @@ void ui_button_color(int state,
 void ui_hp_color(float hp_ratio,
                  float* out_r, float* out_g, float* out_b);
 
+/* ── 追加ウィジェット ───────────────────────────────────*/
+
+/**
+ * プログレスバー。value を 0.0〜1.0 にクランプして返す。
+ * 描画は jp 側が行う (返値を使って矩形を塗る)。
+ */
+float ui_progress(int id, float x, float y, float w, float h, float value);
+
+/**
+ * ラジオボタン。同じ group_id を持つ中で1つだけ選択可能。
+ * 戻り値: このボタンが選択されているかどうか。
+ * initial_selected: 初回呼び出し時の初期選択状態。
+ */
+bool  ui_radio(int id, int group_id, float x, float y, float w, float h,
+               bool initial_selected);
+
+/**
+ * トグルボタン (ON/OFF)。クリックで反転。
+ * 戻り値: 現在の ON/OFF 状態。
+ * initial_val: 初回呼び出し時の初期状態。
+ */
+bool  ui_toggle(int id, float x, float y, float w, float h, bool initial_val);
+
 #ifdef __cplusplus
 }
 #endif
