@@ -151,6 +151,38 @@ static Value fn_ui_toggle(int argc, Value* args) {
         (int)args[0].number, NUM(1), NUM(2), NUM(3), NUM(4), BOOL_(5)));
 }
 
+/* ── v1.2.0 追加ウィジェット ─────────────────────────────*/
+static Value fn_ui_dropdown(int argc, Value* args) {
+    /* 引数: id, x, y, w, h, initial → 選択中インデックスを返す
+     * items は jp 側で管理; C側はインデックスと開閉状態のみ */
+    NEED(6);
+    int id = (int)args[0].number;
+    /* items はゲーム側で描画するため NULLを渡す */
+    return hajimu_number(ui_dropdown(id, NUM(1), NUM(2), NUM(3), NUM(4),
+                                     NULL, 0, (int)args[5].number));
+}
+static Value fn_ui_dropdown_open(int argc, Value* args) {
+    NEED(1);
+    return hajimu_bool(ui_dropdown_open((int)args[0].number));
+}
+static Value fn_ui_spinner(int argc, Value* args) {
+    /* id, x, y, w, h, val, min, max, step */
+    NEED(9);
+    return hajimu_number(ui_spinner((int)args[0].number,
+                                    NUM(1), NUM(2), NUM(3), NUM(4),
+                                    NUM(5), NUM(6), NUM(7), NUM(8)));
+}
+static Value fn_ui_tab(int argc, Value* args) {
+    /* id, group_id, x, y, w, h, initial */
+    NEED(7);
+    return hajimu_bool(ui_tab((int)args[0].number, (int)args[1].number,
+                               NUM(2), NUM(3), NUM(4), NUM(5), BOOL_(6)));
+}
+static Value fn_ui_tab_selected(int argc, Value* args) {
+    NEED(1);
+    return hajimu_number(ui_tab_selected((int)args[0].number));
+}
+
 /* ── プラグインテーブル ─────────────────────────────────*/
 static HajimuPluginFunc funcs[] = {
     /* 初期化・更新 */
@@ -181,12 +213,18 @@ static HajimuPluginFunc funcs[] = {
     { "UIプログレス",     fn_ui_progress,      6, 6 },
     { "UIラジオ",         fn_ui_radio,         7, 7 },
     { "UIトグル",         fn_ui_toggle,        6, 6 },
+    /* v1.2.0 */
+    { "UIドロップダウン",     fn_ui_dropdown,      6, 6 },
+    { "UIドロップダウン開閉", fn_ui_dropdown_open, 1, 1 },
+    { "UIスピナー",           fn_ui_spinner,       9, 9 },
+    { "UIタブ",               fn_ui_tab,           7, 7 },
+    { "UIタブ選択",           fn_ui_tab_selected,  1, 1 },
 };
 
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_ui",
-        .version        = "1.1.0",
+        .version        = "1.2.0",
         .functions      = funcs,
         .function_count = sizeof(funcs) / sizeof(funcs[0]),
     };

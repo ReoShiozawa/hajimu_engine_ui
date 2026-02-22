@@ -136,6 +136,36 @@ bool  ui_radio(int id, int group_id, float x, float y, float w, float h,
  */
 bool  ui_toggle(int id, float x, float y, float w, float h, bool initial_val);
 
+/**
+ * ドロップダウン。戻り値: 現在選択中インデックス。
+ * items: 選択肢文字列配列, count: 要素数, initial: 初期インデックス。
+ * ヘッダー部をクリックで開閉、選択肢クリックで選択&閉じる。
+ */
+int  ui_dropdown(int id, float x, float y, float w, float h,
+                 const char** items, int count, int initial);
+
+/** ドロップダウンが現在開いているか。 */
+bool ui_dropdown_open(int id);
+
+/**
+ * スピナー (数値増減ウィジェット)。戻り値: 現在値。
+ * val: 初期値, min/max: 範囲, step: 増減量。
+ * 右端に +/- ボタン領域を配置。
+ */
+float ui_spinner(int id, float x, float y, float w, float h,
+                 float val, float min, float max, float step);
+
+/**
+ * タブ。同じ group_id のタブから1つだけアクティブにできる。
+ * 戻り値: このタブが選択されているか。
+ * initial: true なら初回にこのタブを選択にする。
+ */
+bool ui_tab(int id, int group_id, float x, float y, float w, float h,
+            bool initial);
+
+/** group_id で現在選択されているタブIDを返す (0=未選択)。 */
+int  ui_tab_selected(int group_id);
+
 #ifdef __cplusplus
 }
 #endif

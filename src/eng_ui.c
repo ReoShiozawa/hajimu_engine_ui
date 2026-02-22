@@ -18,13 +18,20 @@ typedef struct {
     bool  used;
     /* チェックボックス / ラジオ / トグル */
     bool  checked;
-    int   group_id;   /* ラジオグループ識別子 */
+    int   group_id;   /* ラジオグループ識別子 / タブグループID */
     /* スライダー / プログレス */
     float norm_val;
     /* スクロール */
     float scroll;
     /* ボタン前フレーム状態 */
     int   btn_state;
+    /* ドロップダウン */
+    int   dropdown_selected;
+    bool  dropdown_open;
+    /* スピナー */
+    float spin_val;
+    /* タブ */
+    int   tab_selected;   /* このウィジェットが属するグループで選択中のID */
 } UIWidget;
 
 typedef struct {
@@ -271,4 +278,115 @@ bool ui_toggle(int id, float x, float y, float w, float h, bool initial_val) {
     if (rect_contains(x, y, w, h, g.mx, g.my) && g.just_clicked)
         wid->checked = !wid->checked;
     return wid->checked;
+}
+
+/* ── ドロップダウン ─────────────────────────────────────*/
+/* 戻り値: 現在選択中インデックス (0始まり)。
+ * items[]: 各選択肢文字列の配列。count: 要素数。
+ * 内部状態として「開閉」と「選択値」を保持する。
+ * 実際の描画はゲーム側で状態を見て行う想定。 */
+int ui_dropdown(int id, float x, float y, float w, float h,
+                const char** items, int count, int initial) {
+    UIWidget* wid = widget_get(id);
+    if (!wid) return initial;
+    (void)items; /* 描画はゲーム側 */
+
+    /* 初回選択値を設定 */
+    if (wid->dropdown_selected == 0 && initial >= 0 && initial < count)
+        wid->dropdown_selected = initial;
+
+    /* ヘッダー部分クリックで開閉トグル */
+    if (rect_contains(x, y, w, h, g.mx, g.my) && g.just_clicked) {
+        wid->dropdown_open = !wid->dropdown_open;
+    }
+
+    /* 開いているときは選択肢エリアのクリックを拾う */
+    if (wid->dropdown_open && count > 0) {
+        for (int i = 0; i < count; i++) {
+            float iy = y + h + h * i;
+            if (rect_contains(x, iy, w, h, g.mx, g.my) && g.just_clicked) {
+                wid->dropdown_selected = i;
+                wid->dropdown_open = false;
+                break;
+            }
+        }
+    }
+    return wid->dropdown_selected;
+}
+
+/* ドロップダウンが開いているか */
+bool ui_dropdown_open(int id) {
+    UIWidget* wid = widget_get(id);
+    return wid ? wid->dropdown_open : false;
+}
+
+/* ── スピナー ───────────────────────────────────────────*/
+/* 戻り値: 現在値。+/-ボタンのレイアウト: 右半分に ▲▼ ボタン想定。 */
+float ui_spinner(int id, float x, float y, float w, float h,
+                 float val, float min, float max, float step) {
+    UIWidget* wid = widget_get(id);
+    if (!wid) return val;
+
+    /* 初期値 (初回のみ) */
+    if (wid->spin_val == 0.0f && val != 0.0f) wid->spin_val = val;
+
+    /* + ボタン: 右上 1/4 */
+    float bw = w * 0.25f;
+    if (rect_contains(x + w - bw, y, bw, h * 0.5f, g.mx, g.my) && g.just_clicked) {
+        wid->spin_val += step;
+        if (wid->spin_val > max) wid->spin_val = max;
+    }
+    /* - ボタン: 右下 1/4 */
+    if (rect_contains(x + w - bw, y + h * 0.5f, bw, h * 0.5f, g.mx, g.my) && g.just_clicked) {
+        wid->spin_val -= step;
+        if (wid->spin_val < min) wid->spin_val = min;
+    }
+    return wid->spin_val;
+}
+
+/* ── タブ ──────────────────────────────────────────────*/
+/* 戻り値: このタブが選択されているか。
+ * group_id で複数タブを束ねる。initial=true のタブがデフォルト選択。 */
+bool ui_tab(int id, int group_id, float x, float y, float w, float h,
+            bool initial) {
+    UIWidget* wid = widget_get(id);
+    if (!wid) return false;
+    wid->group_id = group_id;
+
+    /* グループ内の selected_id を探す (まずグループのデフォルト初期化) */
+    bool any_selected = false;
+    for (int i = 0; i < UI_MAX_WIDGETS; i++) {
+        if (g.widgets[i].used && g.widgets[i].group_id == group_id
+                && g.widgets[i].tab_selected != 0) {
+            any_selected = true; break;
+        }
+    }
+    if (!any_selected && initial) {
+        /* このタブをグループのデフォルト選択に */
+        for (int i = 0; i < UI_MAX_WIDGETS; i++) {
+            if (g.widgets[i].used && g.widgets[i].group_id == group_id)
+                g.widgets[i].tab_selected = id;
+        }
+        wid->tab_selected = id;
+    }
+
+    /* クリックで選択 */
+    if (rect_contains(x, y, w, h, g.mx, g.my) && g.just_clicked) {
+        /* グループ全体の tab_selected を自分のIDに設定 */
+        for (int i = 0; i < UI_MAX_WIDGETS; i++) {
+            if (g.widgets[i].used && g.widgets[i].group_id == group_id)
+                g.widgets[i].tab_selected = id;
+        }
+        wid->tab_selected = id;
+    }
+    return wid->tab_selected == id;
+}
+
+/* グループで現在選択されているタブIDを返す (0=未選択) */
+int ui_tab_selected(int group_id) {
+    for (int i = 0; i < UI_MAX_WIDGETS; i++) {
+        if (g.widgets[i].used && g.widgets[i].group_id == group_id)
+            return g.widgets[i].tab_selected;
+    }
+    return 0;
 }
