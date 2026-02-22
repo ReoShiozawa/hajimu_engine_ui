@@ -30,7 +30,15 @@
 | `UIボタン色(状態)` | "r,g,b,a" CSV 文字列 |
 | `UIHPバー色(比率)` | "r,g,b" CSV 文字列 (緑→黄→赤) |
 
-## ビルド
+## インストール
+
+### 推奨: はじむパッケージマネージャー
+
+```bash
+hajimu パッケージ 追加 ReoShiozawa/hajimu_engine_ui
+```
+
+### ソースからビルド
 
 ```bash
 git clone https://github.com/ReoShiozawa/hajimu_engine_ui.git
