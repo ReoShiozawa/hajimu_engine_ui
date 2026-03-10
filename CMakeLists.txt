@@ -34,5 +34,5 @@ set_target_properties(engine_ui PROPERTIES
     OUTPUT_NAME "engine_ui"
     SUFFIX ".hjp"
     PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
