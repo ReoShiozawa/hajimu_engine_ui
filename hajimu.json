@@ -1,11 +1,12 @@
 {
+  "schema_version": 2,
   "name": "engine_ui",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "はじむ言語用インゲームUIシステム (IMGUI方式)",
   "author": "Reo Shiozawa",
   "license": "MIT",
   "entry": "build/engine_ui.hjp",
-  "dependencies": [],
+  "dependencies": {},
   "repository": "https://github.com/ReoShiozawa/hajimu_engine_ui",
-  "ビルド": "make build/engine_ui.hjp"
+  "build": "make build/engine_ui.hjp"
 }

@@ -221,6 +221,8 @@ static HajimuPluginFunc funcs[] = {
     { "UIタブ選択",           fn_ui_tab_selected,  1, 1 },
 };
 
+HAJIMU_PLUGIN_ABI_EXPORT()
+
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_ui",
